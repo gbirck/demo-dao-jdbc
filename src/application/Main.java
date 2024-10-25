@@ -24,5 +24,12 @@ public class Main {
         for (Seller s : list) {
             System.out.println(s);
         }
+        System.out.println();
+
+        System.out.println("=== SELLER FIND ALL ===");
+        list = sellerDao.findAll();
+        for (Seller s : list) {
+            System.out.println(s);
+        }
     }
 }
