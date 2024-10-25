@@ -61,7 +61,28 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public void update(Seller seller) {
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(
+                    "UPDATE seller "
+                            + "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
+                            + "WHERE Id = ?");
 
+            ps.setString(1, seller.getName());
+            ps.setString(2, seller.getEmail());
+            ps.setDate(3, new java.sql.Date(seller.getBirthDate().getTime()));
+            ps.setDouble(4, seller.getBaseSalary());
+            ps.setInt(5, seller.getDepartment().getId());
+            ps.setInt(6, seller.getId());
+
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+            throw new DbException(e.getMessage());
+        }
+        finally {
+            DB.closeStatement(ps);
+        }
     }
 
     @Override
@@ -71,17 +92,17 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public Seller findById(Integer id) {
-        PreparedStatement st = null;
+        PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            st = conn.prepareStatement(
+            ps = conn.prepareStatement(
                     "SELECT seller.*, department.Name as DepName " +
                     "FROM seller INNER JOIN department " +
                     "ON seller.DepartmentId = department.Id " +
                     "WHERE seller.Id = ?");
 
-            st.setInt(1, id);
-            rs = st.executeQuery();
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
             if (rs.next()) {
                 Department department = instantiateDepartment(rs);
                 Seller seller = instantiateSeller(rs, department);
@@ -93,7 +114,7 @@ public class SellerDaoJDBC implements SellerDao {
             throw new DbException(e.getMessage());
         }
         finally {
-            DB.closeStatement(st);
+            DB.closeStatement(ps);
             DB.closeResultSet(rs);
         }
 
